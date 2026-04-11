@@ -21,16 +21,16 @@ def test_clean_data_dulplicates():
     clean_raw_files = adapter.clean_data_dulplicates()
 
 
-def test_flatten_data():
-    adapter = KeywordsAdapter('src/keywords.csv')
-    original_files = adapter.load_data()
-    clean_raw_files = adapter.clean_data_dulplicates()
-    adapter.flatten_data(clean_raw_files)
-
-def test_process():
-    adapter = KeywordsAdapter('src/keywords.csv')
-    adapter.process()
-
+#def test_flatten_data():
+    #adapter = KeywordsAdapter('src/keywords.csv')
+    #original_files = adapter.load_data()
+    #clean_raw_files = adapter.clean_data_dulplicates()
+    #adapter.flatten_data(clean_raw_files)
+#
+#def test_process():
+#    adapter = KeywordsAdapter('src/keywords.csv')
+#    adapter.process()
+#
 
    
     

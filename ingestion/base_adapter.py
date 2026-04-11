@@ -14,22 +14,69 @@ class BaseAdapter:
     output: self.data_frame: the data frame for the adaptor.
 
     '''
-    def __init__(self,path):
+    def __init__(self,path,filename):
         # input is a path for the data source.
         self.path = path 
         self.files = None
+        self.filename = filename
         # output is a dataframe.
         self.df = None
     def load_data(self):
         '''
-        This method is to load data from the data source. 
-        ''' 
-        raise NotImplementedError("The load data method you hasn't been implemented yet. Please go to subclass to implement your adaptor.") 
-    def clean_data(self): 
+        This method is to load the data from the csv 
+        '''
+        # If we meet bad data, I'll skip the line first, then add it later. 
+        self.files = pd.read_csv(self.path, on_bad_lines ='skip')
+        rows,columns = self.files.shape
+        print(f'There are {rows} rows and {columns} columns in the file.')
+        print('Loading data...')
+        return self.files 
+                     
+    def check_data_dulplicates(self): 
         """
-        This method is to flatten the data for the specific data frame. 
+        This method is check whether we have the dulicate data in the data frame. 
         """
-        raise NotImplementedError("The clean data method you hasn't been implemented yet. Please go to subclass to implement your adaptor.")
+        print('Checking...')
+        check_dulpliciated_rows = self.files.duplicated().sum()
+        if check_dulpliciated_rows >= 0:
+                print(f'There are {check_dulpliciated_rows} duplicate rows in the data frame.')
+                print('Going to clean the data')
+        else:
+                print('Data is tidy')
+                rows, columns = self.files.shape
+                print(f'There are {rows} rows and {columns} columns in the data frame.')
+        return check_dulpliciated_rows
+                 
+    def clean_data_dulplicates(self):
+            """
+            This method is to clean the dulplicate data in the data frame. 
+            """
+            
+            clean_raw_files = self.files.drop_duplicates()
+            new_files_rows, new_files_columns = clean_raw_files.shape
+            rows, columns = self.files.shape
+            print(f'Before: thre are {rows} rows and {columns} columns in the data frame.')
+            print(f'After: thre are {new_files_rows} rows and {new_files_columns} columns in the data frame.')
+            print('Initial cleaning finished!')
+            self.df = clean_raw_files 
+            return self.df
+        
+    def parse(self, x: str):
+            if isinstance(x,str):
+                    return ast.literal_eval(x)
+            else: 
+                    return []
+            
+    def generate_df(self):
+        self.load_data()
+        print(f'Here is {self.files} file datatype information :/n {self.files.info()}')
+        print(f'Here is the example of the {self.files} dataset:/n {self.files.head(3)} ')
+        return self.df
+
+   
+          
+
+
     def process(self):
         '''
         1.load the data from the data source
@@ -39,7 +86,10 @@ class BaseAdapter:
     
         '''
         self.load_data()
-        self.clean_data()
+        self.check_data_dulplicates()
+        self.clean_data_dulplicates()
+        self.flatten_data()
+
         return self.df 
 
 

@@ -1,0 +1,43 @@
+import pandas as pd
+from ingestion.base_adapter import BaseAdapter
+class CastApater(BaseAdapter): 
+    def flatten_data(self): 
+        """
+        This method is to flatten cast data from credits.csv data source
+        step1: change the nested string format to the list format.
+        step2: explode the data. 
+        step3: take the cast out to form the keywords.df
+        """
+        #step1: change the nested string format to the list format.
+        self.df['cast_list'] = self.df['cast'].apply(self.parse)
+
+        #step2: explode the data
+        cast_df = self.df[['id', 'cast_list']].explode('cast_list')
+        # cast_list now with the dict format
+
+        # drop dulplicate rows 
+        cast_df.dropna(subset= ['cast_list'])
+
+        # flatten the character, gender, names  from the cast_list(dict) column.
+
+        flatten_normailized_cast =  pd.json_normalize(cast_df['cast_list'])
+        
+        #add tmdb_id to the df.
+        # the reason why we do it first is because cast also has the column called id as well.
+        flatten_normailized_cast['tmdb_id'] = cast_df['id']
+
+        #column: character, gender, name
+        # take the id, character, gender, name to the df and rename it. 
+
+        self.df = flatten_normailized_cast[[ 'tmdb_id', 'character','gender', 'name']].rename(
+            columns = {
+            'tmdb_id':'tmdb_id', 
+            'character': 'character_name', 
+            'gender' : 'gender', 
+            'name': 'cast_name'
+            })
+        print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')
+        print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
+        return self.df
+    
+
