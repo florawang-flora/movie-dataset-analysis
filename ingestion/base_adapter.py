@@ -1,5 +1,5 @@
 import pandas as pd
-import ast 
+ from abc import abstractmethod
 class BaseAdapter:
     '''
     BaseAdaptor is an abstract class that defines the interface for all adaptors.
@@ -21,7 +21,7 @@ class BaseAdapter:
         self.filename = filename
         # output is a dataframe.
         self.df = None
-    def load_data(self):
+    def _load_data(self):
         '''
         This method is to load the data from the csv 
         '''
@@ -32,7 +32,7 @@ class BaseAdapter:
         print('Loading data...')
         return self.files 
                      
-    def check_data_dulplicates(self): 
+    def _check_data_dulplicates(self): 
         """
         This method is check whether we have the dulicate data in the data frame. 
         """
@@ -47,7 +47,7 @@ class BaseAdapter:
                 print(f'There are {rows} rows and {columns} columns in the data frame.')
         return check_dulpliciated_rows
                  
-    def clean_data_dulplicates(self):
+    def _clean_data_dulplicates(self):
             """
             This method is to clean the dulplicate data in the data frame. 
             """
@@ -61,21 +61,18 @@ class BaseAdapter:
             self.df = clean_raw_files 
             return self.df
         
-    def parse(self, x: str):
-            if isinstance(x,str):
-                    return ast.literal_eval(x)
-            else: 
-                    return []
-            
+
+
+    # this is the method for the csv file which doesn't have any nested arraay.    
     def generate_df(self):
-        self.load_data()
+        self._load_data()
         print(f'Here is {self.files} file datatype information :/n {self.files.info()}')
         print(f'Here is the example of the {self.files} dataset:/n {self.files.head(3)} ')
-        return self.df
-
-   
-          
-
+        return self.files
+    
+    @abstractmethod
+    def flatten_data(self):
+          pass 
 
     def process(self):
         '''
@@ -85,9 +82,9 @@ class BaseAdapter:
         4, flatten the data for the specific data frame.
     
         '''
-        self.load_data()
-        self.check_data_dulplicates()
-        self.clean_data_dulplicates()
+        self._load_data()
+        self._check_data_dulplicates()
+        self._clean_data_dulplicates()
         self.flatten_data()
 
         return self.df 

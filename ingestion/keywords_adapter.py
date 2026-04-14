@@ -1,6 +1,7 @@
 import pandas as pd
 import ast  
 from ingestion.base_adapter import BaseAdapter
+from tools.utils import Utils
 class KeywordsAdapter(BaseAdapter):
         
                 
@@ -15,7 +16,7 @@ class KeywordsAdapter(BaseAdapter):
                 """
                 # step1: change the nested string format to the list format.
       
-                self.df["keywords_list"] = self.df['keywords'].apply(self.parse)
+                self.df["keywords_list"] = self.df['keywords'].apply(Utils.parse)
                 # retrun a dataframe
                 keywords_df = self.df[['id', 'keywords_list']].explode('keywords_list')
                 #print(keywords_df['keywords_list'].apply(type).value_counts())
@@ -39,13 +40,4 @@ class KeywordsAdapter(BaseAdapter):
                 return self.df 
                 
 
-        def process(self):
-                '''
-                This process to define the the process for the keywords adaptor.
-                '''
-                self.load_data()
-                self.check_data_dulplicates()
-                self.clean_data_dulplicates()
-                self.flatten_data()
-                return self.df
 

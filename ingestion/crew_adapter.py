@@ -1,5 +1,6 @@
 import pandas as pd
 from ingestion.base_adapter import BaseAdapter
+from tools.utils import Utils
 class CrewAdapter(BaseAdapter): 
     def flatten_data(self): 
         """
@@ -9,7 +10,7 @@ class CrewAdapter(BaseAdapter):
         step3: take the cast out to form the keywords.df
         """
         #step1: change the nested string format to the list format.
-        self.df['crew_list'] = self.df['crew'].apply(self.parse)
+        self.df['crew_list'] = self.df['crew'].apply(Utils.parse)
 
         #step2: explode the data
         crew_df = self.df[['id', 'crew_list']].explode('crew_list')

@@ -1,5 +1,6 @@
 import pandas as pd
 from ingestion.base_adapter import BaseAdapter
+from tools.utils import Utils
 class CastApater(BaseAdapter): 
     def flatten_data(self): 
         """
@@ -9,13 +10,13 @@ class CastApater(BaseAdapter):
         step3: take the cast out to form the keywords.df
         """
         #step1: change the nested string format to the list format.
-        self.df['cast_list'] = self.df['cast'].apply(self.parse)
+        self.df['cast_list'] = self.df['cast'].apply(Utils.parse)
 
         #step2: explode the data
         cast_df = self.df[['id', 'cast_list']].explode('cast_list')
         # cast_list now with the dict format
 
-        # drop dulplicate rows 
+        # drop nah rows 
         cast_df.dropna(subset= ['cast_list'])
 
         # flatten the character, gender, names  from the cast_list(dict) column.

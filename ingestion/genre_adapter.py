@@ -1,6 +1,7 @@
 import pandas as pd
 import ast  
 from ingestion.base_adapter import BaseAdapter
+from tools.utils import Utils
 class GenreAdapter(BaseAdapter):
         # flatten data column have problem rn.       
         def flatten_data(self):
@@ -12,7 +13,7 @@ class GenreAdapter(BaseAdapter):
                 """
                 # step1: change the nested string format to the list format.
       
-                self.df["genres_list"] = self.df['genres'].apply(self.parse)
+                self.df["genres_list"] = self.df['genres'].apply(Utils.parse)
                 
                 # retrun a dataframe
                 genres_df = self.df[['id', 'imdb_id','genres_list']].explode('genres_list')
@@ -35,13 +36,4 @@ class GenreAdapter(BaseAdapter):
                 return self.df 
                 
 
-        def process(self):
-                '''
-                This process to define the the process for the keywords adaptor.
-                '''
-                self.load_data()
-                self.check_data_dulplicates()
-                self.clean_data_dulplicates()
-                self.flatten_data()
-                return self.df
 

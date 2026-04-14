@@ -1,6 +1,7 @@
 import pandas as pd
 import ast  
 from ingestion.base_adapter import BaseAdapter
+from tools.utils import Utils
 class MovieAdapter(BaseAdapter):
         # flatten data column have problem rn.       
         def flatten_data(self):
@@ -19,7 +20,7 @@ class MovieAdapter(BaseAdapter):
             """
             # step1: production_companies
     
-            self.df["production_companies"] = self.df['production_companies'].apply(self.parse)
+            self.df["production_companies"] = self.df['production_companies'].apply(Utils.parse)
             movie_df = self.df[['id', 'imdb_id', 'title', 'budget', 'overview', 'popularity', 'production_companies', 'production_countries',
             'release_date','revenue','tagline', 'vote_average', 'vote_count']].explode('production_companies')
             movie_df.dropna(subset = ['production_companies'])
