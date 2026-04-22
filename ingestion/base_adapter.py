@@ -1,5 +1,5 @@
 import pandas as pd
- from abc import abstractmethod
+from abc import abstractmethod
 class BaseAdapter:
     '''
     BaseAdaptor is an abstract class that defines the interface for all adaptors.
@@ -26,7 +26,7 @@ class BaseAdapter:
         This method is to load the data from the csv 
         '''
         # If we meet bad data, I'll skip the line first, then add it later. 
-        self.files = pd.read_csv(self.path, on_bad_lines ='skip')
+        self.files = pd.read_csv(self.path)
         rows,columns = self.files.shape
         print(f'There are {rows} rows and {columns} columns in the file.')
         print('Loading data...')

@@ -1,2 +1,8 @@
-
 sqlite_url: 'sqlite:///movie_data_analysis.db'
+data_source: 
+  movies:
+    path: src/movies_metadata.csv
+    table_name: raw_movies
+  cast:
+    path: src/credits.csv
+    table_name: raw_cast

@@ -7,6 +7,7 @@ from ingestion.genre_adapter import GenreAdapter
 from ingestion.movie_adpater import MovieAdapter
 from tools.load_config import load_conf
 from database.database_adapter import Database
+from curation.curation_movies import CurateMovies
 #adapter_keywords = KeywordsAdapter('src/keywords.csv','keywords')
 #adapter_keywords.process()
 
@@ -47,6 +48,31 @@ sqlite_url = load_config['sqlite_url']
 
 database = Database(sqlite_url, link_df , 'link')
 database.execute_sql()
+
+def main():
+    config = load_conf()
+    data_source= config['data_source']
+    #movies = data_source['movies']
+    #raw_adapter_movie = MovieAdapter(movies['path'],movies['table_name'])
+    #raw_adapter_movie.process()
+
+    #raw_movies_df = raw_adapter_movie.df
+
+    #curated_movie = CurateMovies(raw_movies_df)
+    #curated_movie.run()
+
+
+    ## cast 
+    cast = data_source['cast']
+    raw_adapter_cast = MovieAdapter(cast['path'],cast['table_name'])
+    raw_adapter_cast.process()
+    
+
+if __name__ == '__main__':
+    main()
+
+
+
 
 
 
