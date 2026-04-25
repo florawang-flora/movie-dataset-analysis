@@ -1,6 +1,6 @@
 import pandas as pd
 import ast  
-from ingestion.base_adapter import BaseAdapter
+from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
 class KeywordsAdapter(BaseAdapter):
         

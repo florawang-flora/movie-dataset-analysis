@@ -1,4 +1,4 @@
-from ingestion.keywords_adapter import KeywordsAdapter 
+from raw.keywords_adapter import KeywordsAdapter 
 
 def test_load_data():
     adapter = KeywordsAdapter('src/keywords.csv')

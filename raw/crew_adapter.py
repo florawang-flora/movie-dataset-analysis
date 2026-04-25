@@ -1,5 +1,5 @@
 import pandas as pd
-from ingestion.base_adapter import BaseAdapter
+from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
 class CrewAdapter(BaseAdapter): 
     def flatten_data(self): 
@@ -30,18 +30,45 @@ class CrewAdapter(BaseAdapter):
         #column: department, gender, job， name
         # take the id, character, gender, name to the df and rename it. 
 
-        self.df = flatten_normailized_crew[[ 'tmdb_id', 'department', 'gender', 'job', 'name']].rename(
+        self.df = flatten_normailized_crew[[ 'tmdb_id', 'department', 'gender', 'job', 'name', 'id']].rename(
             columns = {
-            'tmdb_id':'tmdb_id', 
-            'department': 'crew_department', 
+            'tmdb_id':'tmdb_id',
+            'department': 'department',
             'gender' : 'gender', 
             'name': 'crew_name', 
-            'job': 'crew_job'
-            })
-        print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')
+            'job': 'job',
+            'id': 'crew_id'
+             })
+        print(f'Here is {self.filename} file datatype information :/n {self.df.info}')
         print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
-        return self.df
+
+        self.movie_crew_df = flatten_normailized_crew[[ 'tmdb_id','id', 'job', 'department']].rename(
+            columns = {
+            'tmdb_id':'tmdb_id', 
+            'id': 'crew_id',
+            'job': 'job', 
+            'department': 'department'
+            })
+        print(f'Here is movie_crew mapping file datatype information :/n {self.movie_crew_df.info}')
+        print(f'Here is the example of the movie_crew dataset:/n {self.movie_crew_df.head(5)} ')
+        return self.df, self.movie_crew_df 
+
     
+        
+    def process(self):
+        '''
+        1.load the data from the data source
+        2, check the dulplicate rows for it 
+        3. clean the data dulplicate row . 
+        4, flatten the data for the specific data frame.
+    
+        '''
+        self._load_data()
+        self._check_data_dulplicates()
+        self._clean_data_dulplicates()
+        self.flatten_data()
+
+        return self.df, self.movie_crew_df 
 
     
 

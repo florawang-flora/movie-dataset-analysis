@@ -21,6 +21,10 @@ class BaseAdapter:
         self.filename = filename
         # output is a dataframe.
         self.df = None
+        # This is for the movie cast table 
+        # This is for the movie crew table
+        self.movie_cast_df = None
+        self.movie_crew_df = None
     def _load_data(self):
         '''
         This method is to load the data from the csv 

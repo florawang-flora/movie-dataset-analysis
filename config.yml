@@ -1,8 +1,12 @@
-sqlite_url: 'sqlite:///movie_data_analysis.db'
+postgresql_url: "postgresql://postgres:123@localhost:5432/postgres"
 data_source: 
   movies:
     path: src/movies_metadata.csv
     table_name: raw_movies
-  cast:
+  casts:
     path: src/credits.csv
-    table_name: raw_cast
+    table_name: raw_casts
+  crew: 
+    path: src/credits.csv
+    table_name: raw_crew
+

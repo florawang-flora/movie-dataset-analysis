@@ -1,6 +1,6 @@
 import pandas as pd
 import ast  
-from ingestion.base_adapter import BaseAdapter
+from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
 class MovieAdapter(BaseAdapter):
         # flatten data column have problem rn.       
@@ -27,7 +27,7 @@ class MovieAdapter(BaseAdapter):
             movie_df['production_companies'] = movie_df['production_companies'].apply(lambda x : x['name'] if isinstance(x,dict) and 'name' in x else None)
             # step2: production_countries
             movie_df =  self.df[['id', 'imdb_id', 'title', 'budget', 'overview', 'popularity', 'production_companies', 'production_countries',
-            'release_date','revenue','tagline', 'vote_average', 'vote_count']].explode('production_countries')
+            'release_date','revenue','tagline', 'vote_average', 'vote_count',]].explode('production_countries')
             movie_df.dropna(subset = ['production_countries'])
             movie_df['production_countries'] = movie_df['production_countries'].apply(lambda x : x['name'] if isinstance(x,dict) and 'name' in x else None)
             self.df = movie_df.rename(

@@ -7,17 +7,22 @@ class Database:
         self.url = url
         self.df = df 
         self.table_name = table_name
-    def _create_engine(self): 
+    def _postgresql_connection(self): 
         return create_engine(self.url)
-    def execute_sql(self):
+    def _execute_sql(self):
         self.df.to_sql(
             name = self.table_name, 
-            con = self._create_engine(), 
+            con = self._postgresql_connection(), 
             if_exists = 'replace',
             index = False 
         )
         print(f"Successful! {len(self.df)} has been writtein into {self.table_name} table.")
-   
+    def drop_table_databse(self):
+        pass
+    def generate_sql_table(self): 
+        self._postgresql_connection()
+        self._execute_sql()
+    
     
 
     

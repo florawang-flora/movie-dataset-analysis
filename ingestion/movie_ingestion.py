@@ -1,5 +1,5 @@
 import pandas as pd
-class CurateMovies:
+class MovieIngestion:
     '''
     STEP1: CHECK EACH COLUMN WHETHER THEY HAVE THE INCORRECT FORMAT
     FOR EACH COLUMN WE PICKED, check whether the column has incorect format, 
@@ -145,16 +145,16 @@ class CurateMovies:
         
         print(f'Here is the movie dataframe with {rows} rows and {columns} columns')
         print(f'Here is the sample of the dataframe {movie_df.head()}')
-        return self.df
+        return movie_df
 
     def run(self):
         # movies tmdb_id
-        #self.check_primary_null_in_column('tmdb_id')
-        #self.check_key_incorrect_format_string("tmdb_id")
+        self.check_primary_null_in_column('tmdb_id')
+        self.check_key_incorrect_format_string("tmdb_id")
 
         # movies title
-        #movies_title = self.check_null_in_columns('movie_title')
-        #self.clean_string_column(movies_title)
+        movies_title = self.check_null_in_columns('movie_title')
+        self.clean_string_column(movies_title)
 
         # production company
         production_companies = self.check_null_in_columns('production_companies')
@@ -176,7 +176,5 @@ class CurateMovies:
    
    
 
-        
-        
 
  

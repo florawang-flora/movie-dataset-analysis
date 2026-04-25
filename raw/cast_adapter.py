@@ -1,5 +1,5 @@
 import pandas as pd
-from ingestion.base_adapter import BaseAdapter
+from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
 class CastApater(BaseAdapter): 
     def flatten_data(self): 
@@ -30,15 +30,41 @@ class CastApater(BaseAdapter):
         #column: character, gender, name
         # take the id, character, gender, name to the df and rename it. 
 
-        self.df = flatten_normailized_cast[[ 'tmdb_id', 'character','gender', 'name']].rename(
+        self.df = flatten_normailized_cast[[ 'tmdb_id', 'character','gender', 'name', 'id']].rename(
             columns = {
             'tmdb_id':'tmdb_id', 
-            'character': 'character_name', 
+            'id': 'actor_id',
+            'character': 'character', 
             'gender' : 'gender', 
             'name': 'cast_name'
             })
+   
+        self.movie_cast_df = flatten_normailized_cast[[ 'tmdb_id', 'character', 'id']].rename(
+            columns = {
+            'tmdb_id':'tmdb_id', 
+            'id': 'actor_id',
+            'character': 'character', 
+            })
+        
         print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')
         print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
-        return self.df
+        print(f'Here is movie_cast mapping file datatype information :/n {self.movie_cast_df.info()}')
+        print(f'Here is the example of the movie_cast dataset:/n {self.movie_cast_df.head(5)} ')
+        return self.df, self.movie_cast_df 
+    
+    def process(self):
+        '''
+        1.load the data from the data source
+        2, check the dulplicate rows for it 
+        3. clean the data dulplicate row . 
+        4, flatten the data for the specific data frame.
+    
+        '''
+        self._load_data()
+        self._check_data_dulplicates()
+        self._clean_data_dulplicates()
+        self.flatten_data()
+
+        return self.df, self.movie_cast_df 
     
 
