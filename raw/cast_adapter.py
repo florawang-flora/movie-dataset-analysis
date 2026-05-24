@@ -43,7 +43,7 @@ class CastApater(BaseAdapter):
             columns = {
             'tmdb_id':'tmdb_id', 
             'id': 'actor_id',
-            'character': 'character', 
+            'character': 'character'
             })
         
         print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')

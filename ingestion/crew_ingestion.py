@@ -129,6 +129,7 @@ class CrewIngestion:
         self._transformed_table_type()
         self._clean_duplicates()
         self.generate_main_table()
+        return self.crew_df 
 
     
 

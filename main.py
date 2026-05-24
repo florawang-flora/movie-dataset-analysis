@@ -11,6 +11,7 @@ from ingestion.movie_ingestion import MovieIngestion
 from ingestion.cast_ingestion import CastIngestion
 from ingestion.crew_ingestion import CrewIngestion
 from ingestion.mapping_ingestion import MappingIngestion
+from database.database_handler import Database
 
 #adapter_keywords = KeywordsAdapter('src/keywords.csv','keywords')
 #adapter_keywords.process()
@@ -64,6 +65,7 @@ def main():
     # MOVIE TABLE 
     movie_object = MovieIngestion(raw_movie_df)
     movie_df = movie_object.run()
+    print(f'Here is  movie df {movie_df}')
 
 
 
@@ -72,16 +74,16 @@ def main():
     casts = data_source['casts']
     raw_cast= CastApater(casts['path'], casts['table_name'])
     raw_cast_df, raw_movie_cast_df = raw_cast.process()
-    # print(raw_cast_df)
-    #print(raw_movie_cast_df)
     
     # movie_cast_table 
     movie_cast_object = MappingIngestion(raw_movie_cast_df)
     movie_cast_df  = movie_cast_object.process()
-    #print('hhhhh ', movie_cast_df)
+    print(f'Here is movie cast df data source {movie_cast_df.head()}')
     # cast_df
     cast_object = CastIngestion(raw_cast_df)
     cast_df = cast_object.process()
+    print(f'Here is cast df data source {cast_df.head()}')
+
 
     # CREW TABLE
     crew = data_source['crew']
@@ -90,26 +92,41 @@ def main():
     # crew_df 
     crew_object = CrewIngestion(raw_crew_df)
     crew_df = crew_object.process()
+    print(f'HEre is crew_df data source{crew_df.head()}')
 
     # put these movie, cast, crew and mapping tabel to the database. 
 
 
     prosgre_url = config['postgresql_url']
+    db = Database(prosgre_url)
 
-    movie_database=Database(prosgre_url, raw_crew_df , 'movie')
-    movie_database.generate_sql_table()
+    # 1. Create the schema first (run DDL)
+    db.execute_ddl('database/schema.sql')
+
+    # 2. Load dimension tables first
+    #db.load_dataframe(movie_df,  'movie')
+    db.load_dataframe(cast_df,   'cast_table')
+    #db.load_dataframe(crew_df,   'crew')
+
+    # 3. Load mapping tables last (they depend on the dimension tables via FK)
+    #db.load_dataframe(movie_cast_df, 'movie_cast')
+    #db.load_dataframe(movie_crew_df, 'movie_crew')
+
+    #movie_database=Database(prosgre_url, raw_crew_df , 'movie')
+    #movie_database.generate_sql_table()
     
-    crew_database=Database(prosgre_url, raw_crew_df , 'crew')
-    crew_database.generate_sql_table()
+    #crew_database=Database(prosgre_url, raw_crew_df , 'crew')
+    #crew_database.generate_sql_table()
 
-    cast_database=Database(prosgre_url, raw_cast_df , 'cast')
-    cast_database.generate_sql_table()
+    #cast_database=Database(prosgre_url, raw_cast_df , 'crew_df')
+    #cast_database.generate_sql_table()
 
-    movie_cast_database=Database(prosgre_url, raw_movie_cast_df , 'movie_cast_mapping')
-    movie_cast_database.generate_sql_table()
+    #movie_cast_database=Database(prosgre_url, raw_movie_cast_df , 'movie_cast_mapping')
+    #movie_cast_database.generate_sql_table()
 
-    movie_crew_database=Database(prosgre_url, raw_cast_df , 'movie_crew_mapping')
-    movie_crew_database.generate_sql_table()
+    #movie_cast_database=Database(prosgre_url, raw_cast_df , 'movie_crew_mapping')
+    #movie_cast_database.generate_sql_table()
+
 
 
 

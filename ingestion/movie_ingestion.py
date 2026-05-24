@@ -145,6 +145,7 @@ class MovieIngestion:
         
         print(f'Here is the movie dataframe with {rows} rows and {columns} columns')
         print(f'Here is the sample of the dataframe {movie_df.head()}')
+
         return movie_df
 
     def run(self):
@@ -172,7 +173,7 @@ class MovieIngestion:
         # release_date 
 
         self.clean_date_column('release_date')
-        self.generate_movie_dataframe()
+        return self.generate_movie_dataframe()
    
    
 

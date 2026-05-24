@@ -131,6 +131,7 @@ class CastIngestion:
         self._transformed_table_type()
         self._clean_duplicates()
         self.generate_main_table()
+        return self.cast_df 
 
     
 
