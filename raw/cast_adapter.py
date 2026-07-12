@@ -1,6 +1,8 @@
 import pandas as pd
 from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
+from tools.load_config import load_conf
+
 class CastApater(BaseAdapter): 
     def flatten_data(self): 
         """
@@ -22,7 +24,7 @@ class CastApater(BaseAdapter):
         # flatten the character, gender, names  from the cast_list(dict) column.
 
         flatten_normailized_cast =  pd.json_normalize(cast_df['cast_list'])
-        
+        #print('here is the flatten_normalized_cast', flatten_normailized_cast)
         #add tmdb_id to the df.
         # the reason why we do it first is because cast also has the column called id as well.
         flatten_normailized_cast['tmdb_id'] = cast_df['id']
@@ -30,6 +32,7 @@ class CastApater(BaseAdapter):
         #column: character, gender, name
         # take the id, character, gender, name to the df and rename it. 
 
+        # before the change 
         self.df = flatten_normailized_cast[[ 'tmdb_id', 'character','gender', 'name', 'id']].rename(
             columns = {
             'tmdb_id':'tmdb_id', 
@@ -38,19 +41,21 @@ class CastApater(BaseAdapter):
             'gender' : 'gender', 
             'name': 'cast_name'
             })
+      
    
-        self.movie_cast_df = flatten_normailized_cast[[ 'tmdb_id', 'character', 'id']].rename(
-            columns = {
-            'tmdb_id':'tmdb_id', 
-            'id': 'actor_id',
-            'character': 'character'
-            })
+        #self.movie_cast_df = flatten_normailized_cast[[ 'tmdb_id', 'character', 'id']].rename(
+        #    columns = {
+        #    'tmdb_id':'tmdb_id', 
+        #    'id': 'actor_id',
+        #    'character': 'character'
+        #    })
         
-        print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')
-        print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
-        print(f'Here is movie_cast mapping file datatype information :/n {self.movie_cast_df.info()}')
-        print(f'Here is the example of the movie_cast dataset:/n {self.movie_cast_df.head(5)} ')
-        return self.df, self.movie_cast_df 
+        #print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')
+        #print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
+        #print(f'Here is movie_cast mapping file datatype information :/n {self.movie_cast_df.info()}')
+        #print(f'Here is the example of the movie_cast dataset:/n {self.movie_cast_df.head(5)} ')
+        return self.df
+        #, self.movie_cast_df 
     
     def process(self):
         '''
@@ -65,6 +70,14 @@ class CastApater(BaseAdapter):
         self._clean_data_dulplicates()
         self.flatten_data()
 
-        return self.df, self.movie_cast_df 
+        return self.df
+        #, self.movie_cast_df 
     
 
+
+#if __name__ == '__main__':
+#    config = load_conf()
+#    data_source = config['data_source']
+#    casts = data_source['casts']
+#    raw_cast= CastApater(casts['path'], casts['table_name'])
+#    cast_df, movie_cast_df = raw_cast.process()

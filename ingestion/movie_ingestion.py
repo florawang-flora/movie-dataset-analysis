@@ -20,10 +20,11 @@ class MovieIngestion:
     '''
     def __init__(self,df):
         self.df = df 
+        self.transformed_df = None
         self.bad_records = {}
 
     
-    def check_primary_null_in_column(self, col):
+    def _check_primary_null_in_column(self, col):
         is_null_column = self.df[col].isna().any()
         if is_null_column: 
             print(f'The column {col} has null value')
@@ -36,47 +37,46 @@ class MovieIngestion:
 
 
 
+    def _check_key_incorrect_format_string(self, col):
+        """
+        Check whether a supposed ID column has incorrect format.
+        Example: tmdb_id should be numeric, then stored as string.
+        """
+        # First, try to convert the column to numeric values.
+        # Invalid values will be converted to NaN.
+        converted_col = pd.to_numeric(self.df[col], errors="coerce")
+        # Find rows with an invalid format:
+        # The original value is not empty, but it becomes NaN after conversion.
+        # This means the original value has an incorrect format.
 
-    def check_key_incorrect_format_string(self, col):
-          """
-          Check whether a supposed ID column has incorrect format.
-          Example: tmdb_id should be numeric, then stored as string.
-          """
-
-          # 先尝试转成数字；坏值会变成 NaN
-          converted_col = pd.to_numeric(self.df[col], errors="coerce")
-
-          # 找出格式不对的行：
-          # 原值不是空，但转换后变成空，说明原值有问题
-          # check the origianal_id is not NA data. 
-          # after after we do the transformation, we get the Nan data, 
-          # from the example, we can see the data 1998-01-01 under the tmdb_id column, so 
-          # self.df[col].notna() is NaN.
-        
-          bad_format_rows = self.df[self.df[col].notna() & converted_col.isna()]
-          if not bad_format_rows.empty:
-              print(f"The column {col} has incorrect format rows")
-              self.bad_records[f"{col}_bad_format"] = bad_format_rows
-          else:
-              print(f"The column {col} format looks fine")
-
-          # 把转换结果放回 dataframe
-          self.df[col] = converted_col
-
-          # 再找 null（包括原来的 null + 转换失败变成的 null）
-          null_rows = self.df[self.df[col].isna()]
-          if not null_rows.empty:
-              self.bad_records[f"{col}_null_after_convert"] = null_rows
-
-          ## 删除主键为空的行
-          self.df = self.df.dropna(subset=[col])
-
-          # change the int_to_the_str column.
-          self.df[col] = self.df[col].astype(int).astype(str)
-
-          print(f"{col} cleaned successfully")
+        # For example, if "1998-01-01" appears in the tmdb_id column:
+        # self.df[col].notna() returns True because the original value is not empty.
+        # converted_col.isna() also returns True because "1998-01-01"
+        # cannot be converted to a numeric value.
     
-    def check_null_in_columns(self,col): 
+        bad_format_rows = self.df[self.df[col].notna() & converted_col.isna()]
+        if not bad_format_rows.empty:
+            print(f"The column {col} has incorrect format rows")
+            self.bad_records[f"{col}_bad_format"] = bad_format_rows
+        else:
+            print(f"The column {col} format looks fine")
+        # Save the converted values back to the DataFrame.
+        self.df[col] = converted_col
+        # Find null rows, including:
+        # 1. Original null values.
+        # 2. Invalid values that became NaN after conversion.
+        null_rows = self.df[self.df[col].isna()]
+        # save the null rows into bad_records for later investigation.
+        if not null_rows.empty:
+            self.bad_records[f"{col}_null_after_convert"] = null_rows
+        # Delete rows where the primary key is null.
+        self.df = self.df.dropna(subset=[col])
+        # Convert the column from float to integer, and then to string.
+        self.df[col] = self.df[col].astype(int).astype(str)
+        # Print a message after the column is cleaned successfully.
+        print(f"{col} cleaned successfully")
+    
+    def _check_null_in_columns(self,col): 
         is_null_column = self.df[col].isna().any()
         if is_null_column:
             print(f'{col} has null values')
@@ -90,13 +90,13 @@ class MovieIngestion:
         return self.df[col]
 
     
-    def clean_string_column(self, series):
+    def _clean_string_column(self, series):
         col = series.name
         self.df[col] = series.astype(str).str.strip()
         print('Successfully finish cleaning the string column')
         return self.df
     
-    def clean_integer_column(self, series):
+    def _clean_integer_column(self, series):
         col = series.name 
         # tranform to the numeric data
         coverated_col = pd.to_numeric(self.df[col], errors = 'coerce')
@@ -120,7 +120,7 @@ class MovieIngestion:
         return self.df
     
 
-    def clean_date_column(self, col): 
+    def _clean_date_column(self, col): 
         """
         release date : 1999-12-19
         null value
@@ -139,41 +139,81 @@ class MovieIngestion:
         # stanrdardlize the column to 
         self.df[col] = self.df[col].dt.strftime("%Y-%m-%d")
         print(f"{col} formated successfully")
-    def generate_movie_dataframe(self):
-        movie_df = self.df[['tmdb_id', 'movie_title', 'production_companies', 'budget', 'revenue', 'release_date']]
-        rows, columns = movie_df.shape[0], movie_df.shape[1]
-        
-        print(f'Here is the movie dataframe with {rows} rows and {columns} columns')
-        print(f'Here is the sample of the dataframe {movie_df.head()}')
 
-        return movie_df
+    def _transformed_table_type(self):
+        # Display all current column data types.
+        print("Data types before transformation:")
+        print(self.df.dtypes)
+
+        # movies tmdb_id
+        self._check_primary_null_in_column('tmdb_id')
+        self._check_key_incorrect_format_string("tmdb_id")
+        
+        # movie_title
+        # budget
+        # overview
+        # production_companies 
+        string_columns = ['movie_title', 'budget', 'overview','production_companies']
+
+        # clean and transform multiple string columns
+
+        for col in string_columns: 
+            column = self._check_null_in_columns(col)
+            self._clean_string_column(column)
+
+        # release_date
+        # clean release_date and keep the final format as string: YYYY-MM-DD
+        self._clean_date_column('release_date')
+        
+
+        #popularity_date
+        #transformed populartiy to float 
+        converted_popularity = pd.to_numeric(self.df['popularity'], errors = 'coerce')
+        # find incorrect_popuarlity_values
+        # check whether popularity has a value but cannot be converted to a number.
+        boolean_popularity = self.df['popularity'].notna() & converted_popularity.isna()
+        popularity_bad_rows = self.df[boolean_popularity]
+
+        if not popularity_bad_rows.empty: 
+            print('The column popularity has incorrect format rows')
+            self.bad_records['populartiy_bad_format'] = popularity_bad_rows
+        else:
+            print('The column popularity format looks fine')
+
+        # save the converted popularity columns. 
+        self.df['popularity'] = converted_popularity.astype('float64')
+        
+        # revenue
+        # transformed revenus to integer 
+        revenue = self._check_null_in_columns('revenue')
+        self._clean_integer_column(revenue)
+
+        #budget 
+        budget = self._check_null_in_columns('budget')
+        self._clean_integer_column(budget)
+
+
+        self.transformed_df = self.df.copy()
+
+        # display all column data types after transformation 
+        print('Data types after transformation: ')
+        print(self.transformed_df.dtypes)
+        return self.transformed_df
+
+
+
+    def _generate_movie_dataframe(self):
+        rows, columns = self.transformed_df.shape[0], self.transformed_df.shape[1]
+        print(f'Here is the movie dataframe with {rows} rows and {columns} columns')
+        print(f'Here is the sample of the dataframe {self.transformed_df.head()}')
+
+        return self.transformed_df
 
     def run(self):
-        # movies tmdb_id
-        self.check_primary_null_in_column('tmdb_id')
-        self.check_key_incorrect_format_string("tmdb_id")
-
-        # movies title
-        movies_title = self.check_null_in_columns('movie_title')
-        self.clean_string_column(movies_title)
-
-        # production company
-        production_companies = self.check_null_in_columns('production_companies')
-        self.clean_string_column(production_companies)
-
-        # budget
-        # it contans the bad data ValueError: invalid literal for int() with base 10: '/ff9qCepilowshEtG2GYWwzt2bs4.jpg'
-        budget = self.check_null_in_columns('budget')
-        self.clean_integer_column(budget)
-
-        # revenue 
-        revenue  = self.check_null_in_columns('revenue')
-        self.clean_integer_column(revenue)
-      
-        # release_date 
-
-        self.clean_date_column('release_date')
-        return self.generate_movie_dataframe()
+        self._transformed_table_type()
+        self._generate_movie_dataframe()
+        return self._generate_movie_dataframe()
+       
    
    
 

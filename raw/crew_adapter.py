@@ -1,6 +1,7 @@
 import pandas as pd
 from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
+from tools.load_config import load_conf
 class CrewAdapter(BaseAdapter): 
     def flatten_data(self): 
         """
@@ -42,16 +43,16 @@ class CrewAdapter(BaseAdapter):
         print(f'Here is {self.filename} file datatype information :/n {self.df.info}')
         print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
 
-        self.movie_crew_df = flatten_normailized_crew[[ 'tmdb_id','id', 'job', 'department']].rename(
-            columns = {
-            'tmdb_id':'tmdb_id', 
-            'id': 'crew_id',
-            'job': 'job', 
-            'department': 'department'
-            })
-        print(f'Here is movie_crew mapping file datatype information :/n {self.movie_crew_df.info}')
-        print(f'Here is the example of the movie_crew dataset:/n {self.movie_crew_df.head(5)} ')
-        return self.df, self.movie_crew_df 
+        #self.movie_crew_df = flatten_normailized_crew[[ 'tmdb_id','id', 'job', 'department']].rename(
+        #    columns = {
+        #    'tmdb_id':'tmdb_id', 
+        #    'id': 'crew_id',
+        #    'job': 'job', 
+        #    'department': 'department'
+        #    })
+        #print(f'Here is movie_crew mapping file datatype information :/n {self.movie_crew_df.info}')
+        #print(f'Here is the example of the movie_crew dataset:/n {self.movie_crew_df.head(5)} ')
+        #return self.df, self.movie_crew_df 
 
     
         
@@ -68,7 +69,12 @@ class CrewAdapter(BaseAdapter):
         self._clean_data_dulplicates()
         self.flatten_data()
 
-        return self.df, self.movie_crew_df 
-
+        return self.df
+        #, self.movie_crew_df 
     
-
+if __name__ == '__main__':
+     config = load_conf()
+     data_source = config['data_source']
+     cast = data_source['casts']
+     raw_cast = CrewAdapter(cast['path'], cast['table_name'])
+     casts_df = raw_cast.process() 

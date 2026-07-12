@@ -1,8 +1,11 @@
-postgresql_url: "postgresql://postgres:123@localhost:5432/postgres"
+postgresql_url: "postgresql://postgres:123@localhost:5432/movie_db"
 data_source: 
   movies:
     path: src/movies_metadata.csv
     table_name: raw_movies
+  genres: 
+    path: src/movies_metadata.csv
+    table_name: raw_genre
   casts:
     path: src/credits.csv
     table_name: raw_casts

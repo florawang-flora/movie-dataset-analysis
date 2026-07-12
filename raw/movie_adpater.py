@@ -2,6 +2,7 @@ import pandas as pd
 import ast  
 from raw.base_adapter import BaseAdapter
 from tools.utils import Utils
+from tools.load_config import load_conf
 class MovieAdapter(BaseAdapter):
         # flatten data column have problem rn.       
         def flatten_data(self):
@@ -21,15 +22,20 @@ class MovieAdapter(BaseAdapter):
             # step1: production_companies
     
             self.df["production_companies"] = self.df['production_companies'].apply(Utils.parse)
-            movie_df = self.df[['id', 'imdb_id', 'title', 'budget', 'overview', 'popularity', 'production_companies', 'production_countries',
-            'release_date','revenue','tagline', 'vote_average', 'vote_count']].explode('production_companies')
+            movie_df = self.df[['id', 'title', 'budget', 'overview', 'popularity', 'production_companies',
+            'release_date','revenue']].explode('production_companies')
+            print(f'here is movieeee {movie_df}')
+            # 'vote_average', 'vote_count', 'production_countries'
+            #'imdb_id'，'tagline'
+
             movie_df.dropna(subset = ['production_companies'])
             movie_df['production_companies'] = movie_df['production_companies'].apply(lambda x : x['name'] if isinstance(x,dict) and 'name' in x else None)
             # step2: production_countries
-            movie_df =  self.df[['id', 'imdb_id', 'title', 'budget', 'overview', 'popularity', 'production_companies', 'production_countries',
-            'release_date','revenue','tagline', 'vote_average', 'vote_count',]].explode('production_countries')
-            movie_df.dropna(subset = ['production_countries'])
-            movie_df['production_countries'] = movie_df['production_countries'].apply(lambda x : x['name'] if isinstance(x,dict) and 'name' in x else None)
+            #movie_df =  self.df[['id', 'imdb_id', 'title', 'budget', 'overview', 'popularity', 'production_companies', 'production_countries',
+            #'release_date','revenue']].explode('production_countries')
+            #,'tagline', 'vote_average', 'vote_count'
+            #movie_df.dropna(subset = ['production_countries'])
+            #movie_df['production_countries'] = movie_df['production_countries'].apply(lambda x : x['name'] if isinstance(x,dict) and 'name' in x else None)
             self.df = movie_df.rename(
                     columns = {
                             'id':'tmdb_id', 
@@ -40,6 +46,13 @@ class MovieAdapter(BaseAdapter):
             print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
             return self.df
 
+
+#if __name__ == '__main__':
+#      config = load_conf()
+#      data_source = config['data_source']
+#      movies = data_source['movies']
+#      raw_movie = MovieAdapter(movies['path'], movies['table_name'])
+#      movie_df = raw_movie.process()
 
 
 

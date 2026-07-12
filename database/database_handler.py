@@ -46,9 +46,11 @@ class Database:
         """
         df.to_sql(
             name=table_name,
+            schema = 'public',
             con=self.engine,
             if_exists='append',   # keep the schema, only insert rows
             index=False,          # do not write the DataFrame index as a column
-            method='multi'        # batch insert, much faster
+            method='multi',       # batch insert, much faster
+            chunksize=1000       
         )
         print(f"Inserted {len(df)} rows into {table_name}")
