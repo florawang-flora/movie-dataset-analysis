@@ -33,7 +33,7 @@ class GenreCuration(BaseCuration):
 
         rows = self.entity_df.shape[0]
         columns = self.entity_df.shape[1]
-        print(f"The movie entity dataframe has {rows} rows {columns} columns")
+        print(f"The genre entity dataframe has {rows} rows {columns} columns")
         
         print(self.entity_df.head(2))
         

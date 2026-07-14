@@ -1,9 +1,10 @@
 import pandas as pd
 class GenreIngestion:
-    def __init__(self,genre_df):
+    def __init__(self,genre_df,valid_tmdb_ids):
         self.df = genre_df.copy()
         # store invalid records for later investigation
         self.bad_records ={}
+        self.valid_tmdb_ids = valid_tmdb_ids
 
     #def genre_id, tmdb_id, genre_id, whether has the null value., 
     # if it has, save it to the bad_record. 
@@ -60,7 +61,24 @@ class GenreIngestion:
 
         return self.df
 
-        # genrate the genre_raw_base table 
+    def _filter_valid_tmdb_ids(self):
+        '''
+        Only keep cast records whose tmdb_id is not in the movie table 
+        '''
+        #make tmdb_id string type
+        self.df['tmdb_id'] = self.df['tmdb_id'].astype(str)
+        #find cast records whose tmdb_id is not in the movie table
+        invalid_rows = self.df[~self.df['tmdb_id'].isin(self.valid_tmdb_ids)]
+        # save invalid records 
+        if not invalid_rows.empty:
+            self.bad_records['valid_tmdb_ids'] = invalid_rows
+            print(f'Found {len(invalid_rows)} invalid tmdb_id records')
+        # only keep valid tmdb_records
+        boolean_valid_records = self.df['tmdb_id'].isin(self.valid_tmdb_ids)
+        self.df = self.df[boolean_valid_records]
+        print(f'{len(self.df)} valid cast records remain')
+        return self.df 
+        
     
     def _clean_duplicates(self):
         boolean_dulplicates = self.df.duplicated(
@@ -89,6 +107,7 @@ class GenreIngestion:
 
     def process(self):
         self._transformed_table_type()
+        self._filter_valid_tmdb_ids()
         self._clean_duplicates()
         self._generate_genre_table()
 

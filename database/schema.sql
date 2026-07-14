@@ -14,6 +14,53 @@ release_date DATE
 
 ======
 
+
+CREATE TABLE public.cast_table (
+    actor_id VARCHAR(11) PRIMARY KEY,
+    gender VARCHAR(8),
+    cast_name VARCHAR(46)
+);
+
+CREATE TABLE public.cast_movie (
+    character_name VARCHAR(391),
+    tmdb_id VARCHAR(20) NOT NULL,
+    actor_id VARCHAR(11) NOT NULL,
+
+    PRIMARY KEY (tmdb_id, actor_id),
+
+    FOREIGN KEY (tmdb_id)
+        REFERENCES public.movie(tmdb_id),
+
+    FOREIGN KEY (actor_id)
+        REFERENCES public.cast_table(actor_id)
+);
+======
+
+DROP TABLE IF EXISTS public.crew
+CREATE TABLE public.crew (
+    crew_id VARCHAR(20) PRIMARY KEY,
+    gender VARCHAR(10),
+    crew_name VARCHAR(45)
+);
+
+
+DROP TABLE IF EXISTS public.crew_movie
+CREATE TABLE public.crew_movie (
+    department VARCHAR(25),
+    job VARCHAR(65),
+    tmdb_id VARCHAR(20) NOT NULL,
+    crew_id VARCHAR(20) NOT NULL,
+
+    PRIMARY KEY (tmdb_id, crew_id),
+
+    FOREIGN KEY (tmdb_id)
+        REFERENCES public.movie(tmdb_id),
+
+    FOREIGN KEY (crew_id)
+        REFERENCES public.crew(crew_id)
+);
+=======
+
 DROP TABLE IF EXISTS movie_genre;
 
 CREATE TABLE movie_genre (
@@ -31,12 +78,7 @@ CREATE TABLE movie_genre (
 
 DROP TABLE IF EXISTS cast_table CASCADE;
 
-CREATE TABLE cast_table (
 
-    actor_id VARCHAR(10) PRIMARY KEY, 
-    crew_name    VARCHAR(45),
-    gender  VARCHAR(7)
-);
 
 CREATE INDEX indx_cast_name ON cast_table(crew_name);
 

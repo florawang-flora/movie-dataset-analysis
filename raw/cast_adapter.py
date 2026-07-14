@@ -13,7 +13,7 @@ class CastApater(BaseAdapter):
         """
         #step1: change the nested string format to the list format.
         self.df['cast_list'] = self.df['cast'].apply(Utils.parse)
-
+        
         #step2: explode the data
         cast_df = self.df[['id', 'cast_list']].explode('cast_list')
         # cast_list now with the dict format
@@ -24,9 +24,11 @@ class CastApater(BaseAdapter):
         # flatten the character, gender, names  from the cast_list(dict) column.
 
         flatten_normailized_cast =  pd.json_normalize(cast_df['cast_list'])
+        #print(flatten_normailized_cast.head(1))
         #print('here is the flatten_normalized_cast', flatten_normailized_cast)
         #add tmdb_id to the df.
         # the reason why we do it first is because cast also has the column called id as well.
+        # save id named as tmdb_id in case of ambiguity
         flatten_normailized_cast['tmdb_id'] = cast_df['id']
 
         #column: character, gender, name
@@ -37,25 +39,13 @@ class CastApater(BaseAdapter):
             columns = {
             'tmdb_id':'tmdb_id', 
             'id': 'actor_id',
-            'character': 'character', 
+            'character': 'character_name', 
             'gender' : 'gender', 
             'name': 'cast_name'
             })
       
-   
-        #self.movie_cast_df = flatten_normailized_cast[[ 'tmdb_id', 'character', 'id']].rename(
-        #    columns = {
-        #    'tmdb_id':'tmdb_id', 
-        #    'id': 'actor_id',
-        #    'character': 'character'
-        #    })
-        
-        #print(f'Here is {self.filename} file datatype information :/n {self.df.info()}')
-        #print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
-        #print(f'Here is movie_cast mapping file datatype information :/n {self.movie_cast_df.info()}')
-        #print(f'Here is the example of the movie_cast dataset:/n {self.movie_cast_df.head(5)} ')
         return self.df
-        #, self.movie_cast_df 
+       
     
     def process(self):
         '''
@@ -71,7 +61,6 @@ class CastApater(BaseAdapter):
         self.flatten_data()
 
         return self.df
-        #, self.movie_cast_df 
     
 
 
@@ -79,5 +68,9 @@ class CastApater(BaseAdapter):
 #    config = load_conf()
 #    data_source = config['data_source']
 #    casts = data_source['casts']
+#
 #    raw_cast= CastApater(casts['path'], casts['table_name'])
-#    cast_df, movie_cast_df = raw_cast.process()
+#
+#    cast_df = raw_cast.process()
+#    print(f'here is cast df {cast_df.dtypes}')
+#    print(f'here is cast df {cast_df.shape}')

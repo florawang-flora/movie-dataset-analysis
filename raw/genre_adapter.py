@@ -40,10 +40,10 @@ class GenreAdapter(BaseAdapter):
 
                 return self.df 
 
-if __name__ == '__main__':
-        config = load_conf()
-        data_source = config['data_source']
-        genre = data_source['genres']
-        raw_genre = GenreAdapter(genre['path'], genre['table_name'])
-        genres_df = raw_genre.process()
-         
+#if __name__ == '__main__':
+#        config = load_conf()
+#        data_source = config['data_source']
+#        genre = data_source['genres']
+#       raw_genre = GenreAdapter(genre['path'], genre['table_name'])
+#       genres_df = raw_genre.process()
+        

@@ -12,12 +12,12 @@ from ingestion.movie_ingestion import MovieIngestion
 from ingestion.cast_ingestion import CastIngestion
 from ingestion.crew_ingestion import CrewIngestion
 from ingestion.genre_ingestion import GenreIngestion
-from ingestion.mapping_ingestion import MappingIngestion
 from curation.curation_base import BaseCuration
 from curation.curation_movie import MovieCuration
 from curation.curation_genre import GenreCuration
+from curation.curation_cast import CastCuration
+from curation.curation_crew import CrewCuration
 from database.database_handler import Database
-from export_csv import export_csv
 
 #adapter_keywords = KeywordsAdapter('src/keywords.csv','keywords')
 #adapter_keywords.process()
@@ -64,31 +64,37 @@ def main():
     config = load_conf()
     data_source= config['data_source']
 
+    # ===============
     # movie df 
     movies = data_source['movies']
     raw_movie = MovieAdapter(movies['path'],movies['table_name'])
     raw_movie_df = raw_movie.process()
 
-    # movie ingestion
+    ## movie ingestion
     movie_df_ingest = MovieIngestion(raw_movie_df)
     raw_movie_df = movie_df_ingest.run()
     print(raw_movie_df.dtypes)
 
-    # movie entity - curation process
+    ## movie entity - curation process
     movie_entity = MovieCuration(raw_movie_df)
     movie_entity_df = movie_entity.run()
     print(f'The movie entity df data type {movie_entity_df.dtypes}')
 
 
+    # we only investigate invalid 
+    valid_tmdb_ids = set(movie_entity_df['tmdb_id'].astype(str).str.strip())
+    print(f'There are {len(valid_tmdb_ids)} valid movie IDs')
+
+    #==================
     # genre table 
     genres = data_source['genres']
     raw_genres = GenreAdapter(genres['path'], genres['table_name'])
     raw_genre_df = raw_genres.process()
 
-    #genre ingestion
-    genre_df_ingestion = GenreIngestion(raw_genre_df)
+    ##genre ingestion
+    genre_df_ingestion = GenreIngestion(raw_genre_df, valid_tmdb_ids)
     raw_genre_df = genre_df_ingestion.process()
-    print(f'The shape of  raw genre  table   \n {raw_genre_df.shape}')
+    print(f'The shape of raw genre  table   \n {raw_genre_df.shape}')
 
     #genre curation process
 
@@ -97,37 +103,48 @@ def main():
     print(f'The genre entity  data type\n {genre_entity_df.dtypes}')
     print(f'The genre movie mapping table  data type \n {genre_entity_df.dtypes}')
 
+    #==================
 
+    # cast table 
+    casts = data_source['casts']
+    raw_cast= CastApater(casts['path'], casts['table_name'])
+    raw_cast_df = raw_cast.process()
+    print(raw_cast_df.dtypes)
+    print(raw_cast_df.head())
 
+    #cast ingestion
+    cast_df_ingestion = CastIngestion(raw_cast_df,valid_tmdb_ids)
+    raw_cast_df = cast_df_ingestion.process()
+    print(f'The shape of raw cast  table   \n {raw_cast_df.shape}')
 
-    ## CAST TABLE 
-    # raw_cast
-    #casts = data_source['casts']
-    #raw_cast= CastApater(casts['path'], casts['table_name'])
-    #raw_cast_df, raw_movie_cast_df = raw_cast.process()
-    
-    # movie_cast_table 
-    #movie_cast_object = MappingIngestion(raw_movie_cast_df)
-    #movie_cast_df  = movie_cast_object.process()
-    #print(f'Here is movie cast df data source {movie_cast_df.head()}')
-    # cast_df
-    #cast_object = CastIngestion(raw_cast_df)
-    #cast_df = cast_object.process()
-    #print(f'Here is cast df data source {cast_df.head()}')
+    cast_entity = CastCuration(raw_cast_df)
+    cast_entity_df, cast_movie_mapping = cast_entity.run()
+    print(f'The cast entity data type\n {cast_entity_df.dtypes}')
+    print(f'The cast movie mapping table data type \n {cast_movie_mapping.dtypes}')
+   
+    #==================
 
+    # crew table 
+    crew = data_source['crew']
+    raw_crew = CrewAdapter(crew['path'], crew['table_name'])
+    raw_crew_df= raw_crew.process()
 
-    # CREW TABLE
-    #crew = data_source['crew']
-    #raw_crew = CrewAdapter(crew['path'], crew['table_name'])
-    #raw_crew_df,raw_movie_cast_df= raw_crew.process()
-    # crew_df 
-    #crew_object = CrewIngestion(raw_crew_df)
-    #crew_df = crew_object.process()
-    #print(f'HEre is crew_df data source{crew_df.head()}')
+    # crew ingestion 
+    crew_df_ingestion = CrewIngestion(raw_crew_df,valid_tmdb_ids)
+    raw_crew_df = crew_df_ingestion.process()
+    print(f'The shape of raw crew  table   \n {raw_crew_df.shape}')
+
+    crew_entity = CrewCuration(raw_crew_df)
+    crew_entity_df , crew_movie_mapping = crew_entity.run()
+    print(f'The cast entity data type\n {crew_entity_df.dtypes}')
+    print(f'The cast movie mapping table data type \n {crew_movie_mapping.dtypes}')
+
+ 
 
     # put these movie, cast, crew and mapping tabel to the database. 
 
-
+    #=========================
+    #postgresql
     prosgre_url = config['postgresql_url']
     db = Database(prosgre_url)
 
@@ -135,14 +152,22 @@ def main():
     #db.execute_ddl('database/schema.sql')
 
     # 2. Load dimension tables first
+    # this is to check whether in the database, otherwise, not in the 
     #db.load_dataframe(movie_entity_df,  'movie')
     #db.load_dataframe(genre_entity_df,   'genre')
-    db.load_dataframe(genre_movie_mapping, 'genre_movie') 
-    #db.load_dataframe(crew_df,   'crew')
+    #db.load_dataframe(genre_movie_mapping, 'genre_movie') 
+    #db.load_dataframe(cast_entity_df,   'cast_table')
+    #db.load_dataframe(cast_movie_mapping, 'cast_movie') 
+    db.load_dataframe(crew_entity_df,   'crew')
+    db.load_dataframe(crew_movie_mapping,   'crew_movie')
 
    
 
-    tables = ["genre", 'movie', 'genre_movie']
+    tables = ['crew', 'crew_movie']
+    # 
+    # ['genre','genre_movie']
+   # ['movie','cast_table', 'cast_movie']
+        #"genre", 'movie', 'genre_movie','cast_table', ]
 
     Utils.export_tables_to_csv(
     database_url=prosgre_url,

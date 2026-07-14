@@ -79,9 +79,8 @@ class BaseCuration:
         if not null_rows.empty: 
             print(f'The primary key {primary_key} has null values')
             self.bad_records[f'{primary_key}_null'] = null_rows
-
-        # we have save the bad records. Delete rows where the primary key is null. 
-        self.entity_df = self.entity_df.dropna(subset = [primary_key])
+            # we have save the bad records. Delete rows where the primary key is null. 
+            self.entity_df = self.entity_df.dropna(subset = [primary_key])
 
         # check duplicated_rows.empty: 
         boolean_duplicate_primary_key = self.entity_df.duplicated(subset=[primary_key], keep=False)
@@ -110,11 +109,6 @@ class BaseCuration:
 
         return self.entity_df 
 
-
-        #if not duplicate_rows.empty: 
-            #print(f'The primary key {primary_key} has duplicated balues')
-
-    #def primary_key_check_mapping_table(self): 
 
     
 

@@ -43,16 +43,6 @@ class CrewAdapter(BaseAdapter):
         print(f'Here is {self.filename} file datatype information :/n {self.df.info}')
         print(f'Here is the example of the {self.filename} dataset:/n {self.df.head(5)} ')
 
-        #self.movie_crew_df = flatten_normailized_crew[[ 'tmdb_id','id', 'job', 'department']].rename(
-        #    columns = {
-        #    'tmdb_id':'tmdb_id', 
-        #    'id': 'crew_id',
-        #    'job': 'job', 
-        #    'department': 'department'
-        #    })
-        #print(f'Here is movie_crew mapping file datatype information :/n {self.movie_crew_df.info}')
-        #print(f'Here is the example of the movie_crew dataset:/n {self.movie_crew_df.head(5)} ')
-        #return self.df, self.movie_crew_df 
 
     
         
@@ -72,9 +62,9 @@ class CrewAdapter(BaseAdapter):
         return self.df
         #, self.movie_crew_df 
     
-if __name__ == '__main__':
-     config = load_conf()
-     data_source = config['data_source']
-     cast = data_source['casts']
-     raw_cast = CrewAdapter(cast['path'], cast['table_name'])
-     casts_df = raw_cast.process() 
+#if __name__ == '__main__':
+#     config = load_conf()
+#     data_source = config['data_source']
+#     crew = data_source['crew']
+#     raw_cast = CrewAdapter(crew['path'], crew['table_name'])
+#     casts_df = raw_cast.process() 
