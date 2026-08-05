@@ -54,3 +54,17 @@ class Database:
             chunksize=1000       
         )
         print(f"Inserted {len(df)} rows into {table_name}")
+
+    def run_query(self, sql, params=None ):
+        # open the conection 
+        conn = self.engine.connect()
+        # run the query 
+        results = conn.execute(text(sql), params or {})
+        rows = []
+        # install as list of dict. 
+        for row in results: 
+            rows.append(dict(row._mapping))
+        # close the conection 
+        conn.close()
+        return rows 
+  

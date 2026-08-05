@@ -19,48 +19,8 @@ from curation.curation_cast import CastCuration
 from curation.curation_crew import CrewCuration
 from database.database_handler import Database
 
-#adapter_keywords = KeywordsAdapter('src/keywords.csv','keywords')
-#adapter_keywords.process()
 
-# cast 
-#adapter_cast = CastApater('src/credits.csv','cast')
-#adapter_cast.process()
-
-# crew 
-#adapter_crew = CrewAdapter('src/credits.csv','crew')
-#adapter_crew.process()
-
-# genres 
-#adapter_genres = GenreAdapter('src/movies_metadata.csv','genres')
-#adapter_genres.process()
-
-
-# movie adapter 
-#adapter_crew = MovieAdapter('src/movies_metadata.csv','movie')
-#adapter_crew.process()
-
-
-
-
-#rating adapter
-# links adapter 
-#adapter_rating = BaseAdapter('src/ratings_small.csv','ratings')
-#adapter_rating.generate_df()
-
-
-# links adapter 
-#adapter_links = BaseAdapter('src/links_small.csv','links')
-#link_df = adapter_links.generate_df()
-
-# take the link information to the database. 
-#oad_config = load_conf()
-# take the sqlite_url 
-#sqlite_url = load_config['sqlite_url']
-
-##database = Database(sqlite_url, link_df , 'link')
-#database.execute_sql()
-
-def main():
+def main_data_analytics():
     config = load_conf()
     data_source= config['data_source']
 
@@ -148,8 +108,6 @@ def main():
     prosgre_url = config['postgresql_url']
     db = Database(prosgre_url)
 
-    # 1. Create the schema first (run DDL)
-    #db.execute_ddl('database/schema.sql')
 
     # 2. Load dimension tables first
     # this is to check whether in the database, otherwise, not in the 
@@ -163,35 +121,15 @@ def main():
 
    
 
-    tables = ['crew', 'crew_movie']
-    # 
-    # ['genre','genre_movie']
-   # ['movie','cast_table', 'cast_movie']
-        #"genre", 'movie', 'genre_movie','cast_table', ]
+    tables = ['crew', 'crew_movie', 'cast_table' , 'cast_movie', 'genre', 'genre_movie']
+
 
     Utils.export_tables_to_csv(
     database_url=prosgre_url,
     tables=tables,
     export_folder="export")
 
-    # 3. Load mapping tables last (they depend on the dimension tables via FK)
-    #db.load_dataframe(movie_cast_df, 'movie_cast')
-    #db.load_dataframe(movie_crew_df, 'movie_crew')
-
-    #movie_database=Database(prosgre_url, raw_crew_df , 'movie')
-    #movie_database.generate_sql_table()
-    
-    #crew_database=Database(prosgre_url, raw_crew_df , 'crew')
-    #crew_database.generate_sql_table()
-
-    #cast_database=Database(prosgre_url, raw_cast_df , 'crew_df')
-    #cast_database.generate_sql_table()
-
-    #movie_cast_database=Database(prosgre_url, raw_movie_cast_df , 'movie_cast_mapping')
-    #movie_cast_database.generate_sql_table()
-
-    #movie_cast_database=Database(prosgre_url, raw_cast_df , 'movie_crew_mapping')
-    #movie_cast_database.generate_sql_table()
+ 
 
 
 
@@ -218,7 +156,7 @@ def main():
     
 
 if __name__ == '__main__':
-    main()
+    main_data_analytics()
 
 
 
