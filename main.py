@@ -7,7 +7,6 @@ from raw.cast_adapter import CastApater
 from raw.crew_adapter import CrewAdapter
 from raw.genre_adapter import GenreAdapter
 from raw.movie_adpater import MovieAdapter
-from database.database_adapter import Database
 from ingestion.movie_ingestion import MovieIngestion
 from ingestion.cast_ingestion import CastIngestion
 from ingestion.crew_ingestion import CrewIngestion
@@ -18,6 +17,7 @@ from curation.curation_genre import GenreCuration
 from curation.curation_cast import CastCuration
 from curation.curation_crew import CrewCuration
 from database.database_handler import Database
+from cli.chat_agent
 
 
 def main_data_analytics():
@@ -39,7 +39,6 @@ def main_data_analytics():
     movie_entity = MovieCuration(raw_movie_df)
     movie_entity_df = movie_entity.run()
     print(f'The movie entity df data type {movie_entity_df.dtypes}')
-
 
     # we only investigate invalid 
     valid_tmdb_ids = set(movie_entity_df['tmdb_id'].astype(str).str.strip())
@@ -99,61 +98,64 @@ def main_data_analytics():
     print(f'The cast entity data type\n {crew_entity_df.dtypes}')
     print(f'The cast movie mapping table data type \n {crew_movie_mapping.dtypes}')
 
- 
-
     # put these movie, cast, crew and mapping tabel to the database. 
-
     #=========================
+   # database analysis 
     #postgresql
     prosgre_url = config['postgresql_url']
     db = Database(prosgre_url)
-
-
-    # 2. Load dimension tables first
-    # this is to check whether in the database, otherwise, not in the 
-    #db.load_dataframe(movie_entity_df,  'movie')
-    #db.load_dataframe(genre_entity_df,   'genre')
-    #db.load_dataframe(genre_movie_mapping, 'genre_movie') 
-    #db.load_dataframe(cast_entity_df,   'cast_table')
-    #db.load_dataframe(cast_movie_mapping, 'cast_movie') 
-    db.load_dataframe(crew_entity_df,   'crew')
-    db.load_dataframe(crew_movie_mapping,   'crew_movie')
-
-   
-
-    tables = ['crew', 'crew_movie', 'cast_table' , 'cast_movie', 'genre', 'genre_movie']
-
+    schema = config["database"]['schema']
+    table_to_load = config['table_to_load']
+    tables = []
+    missing_table_configs = []
+    # add database table cmoviesonfig 
+    for table_config in table_to_load: 
+        table_name = table_config['table_name']
+        tables.append(table_name)
+        print(table_name)
+        if db.table_exists(table_name,schema=schema): 
+            print(f"Table '{table_name}' already exists.")
+        else: 
+            print(f"Table '{table_name}' does not exist.")
+            missing_table_configs.append(table_config)
+    available_dataframes = locals()
+    
+    if missing_table_configs:
+        for table_config in missing_table_configs:
+            table_name = table_config['table_name']
+            dataframe_name = table_config['dataframe_name']
+            dataframe = available_dataframes.get(dataframe_name)
+            print(f"Loading Dataframe {dataframe_name} into table {schema}.{table_name}")
+            db.load_dataframe(dataframe, table_name)
+            print(f'Table {schema}.{table_name} loaded successfully')
+    else:
+        print('All required tables already exist. Nothing to load')
 
     Utils.export_tables_to_csv(
     database_url=prosgre_url,
     tables=tables,
     export_folder="export")
-
- 
-
+def 
 
 
 
+## if __name__ == '__main__':
+#    agent = ChatAgent()
+#    print("Let's Chat! (type quite or exit to leave )\n")
+#    while True: 
+#        user_input = input("You: ")
+#        if user_input.lower() in ('quit','exit', 'bye' ):
+#            print('Goodbye!')
+#            break
+#        # skpit
+#        if not user_input.strip():
+#            continue
+#        reply = agent.random_chat(user_input)
+#        print(reply)
 
-
-    
-
-
-
-
-
-
-    #raw_movies_df = raw_adapter_movie.df
-
-    #curated_movie = CurateMovies(raw_movies_df)
-    #curated_movie.run()
-
-
-    ## cast 
-    #cast = data_source['cast']
-    #raw_adapter_cast = MovieAdapter(cast['path'],cast['table_name'])
-    #raw_adapter_cast.process()
-    
+# task1 
+#result = agent.search_movie("What movies did Tom Hanks appear in?")
+#print(result)
 
 if __name__ == '__main__':
     main_data_analytics()

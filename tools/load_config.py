@@ -7,4 +7,3 @@ def load_conf():
     config_path = current_project_abs / 'config.yml'
     with open(config_path, 'r') as file: 
         return yaml.safe_load(file)
-    

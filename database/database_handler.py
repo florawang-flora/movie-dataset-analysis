@@ -1,5 +1,5 @@
 # database/database_adapter.py
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text,inspect
 
 
 class Database:
@@ -55,6 +55,21 @@ class Database:
         )
         print(f"Inserted {len(df)} rows into {table_name}")
 
+    def table_exists(self, table_name, schema="public"):
+        """
+        Check whether a table exists in the specified database schema.
+
+        Returns:
+        True if the table exists.
+        False if the table does not exist.
+        """
+
+        # Create a SQLAlchemy inspector to examine the database structure
+        inspector = inspect(self.engine)
+        # Check whether the specified table exists in the given schema
+        has_table = inspector.has_table(table_name=table_name,schema=schema)
+        return has_table
+    
     def run_query(self, sql, params=None ):
         # open the conection 
         conn = self.engine.connect()

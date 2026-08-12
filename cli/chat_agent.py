@@ -110,7 +110,7 @@ class ChatAgent:
     
     # task3: 
     
-    def split_into_chunks(self, text, chunk_size=50000):
+    def split_into_chunks(self, text, chunk_size=5000):
         """
         Split a long text into smaller chunks.
         """
@@ -138,47 +138,61 @@ class ChatAgent:
         # 4. extract themes from each chunk, count them
         counter = Counter()
         for i, chunk in enumerate(chunks):
-            # commonly mentioned words in movies
-            print(f'Processing chunk {i+ 1}/{len(chunks)}...')
-            # ask deepseek to find the top themes
+        
+            print(
+                f"Processing chunk {i + 1}/{len(chunks)} "
+                f"- {len(chunk)} characters"
+            )
+
             system_prompt = """
-            You are a movie analyst. Read the movie plot summaries.
-            Identify the main themes/topics (like revenge, space, love, war, family).
-            Return ONLY a JSON object like this:
+            You are a movie analyst.
+            Read the movie plot summaries.
+            Identify the main themes/topics.
+
+            Return ONLY JSON:
             {"themes": ["love", "war", "revenge"]}
             """
-            response = self.client.chat.completions.create(
-                model= 'deepseek-chat',
-                messages =[
-                    {"role": "system", "content": system_prompt},
-                    {"role":"user", "content": chunk}
-                ])
-            
-            result = json.loads(response.choices[0].message.content)
 
-            # count each theme 
-            for theme in result["themes"]:
-                counter[theme] = counter[theme] + 1 
-        
+            response = self.client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": chunk}
+                ],
+                temperature=0.1,
+                response_format={"type": "json_object"}
+            )
+
+            content = response.choices[0].message.content
+
+            try:
+                result = json.loads(content)
+
+                for theme in result.get("themes", []):
+                    counter[theme.lower()] += 1
+
+            except json.JSONDecodeError as e:
+                print(f"JSON error in chunk {i + 1}: {e}")
+                print("DeepSeek response:")
+                print(content)
+                continue
         return counter.most_common(10)
 
     
 
-if __name__ == "__main__":
-    agent = ChatAgent()
+#if __name__ == "__main__":
+#    agent = ChatAgent()
 
-    agent.build_movie_embeddings(limit=4000)
+#    agent.build_movie_embeddings(limit=4000)
 
 
 
-#if __name__ == '__main__':
-#        agent = ChatAgent()
-#        top_themes = agent.analyze_themes(limit = 4000)
-#        print("\n=== Top 10 theme  ===")
-#        for theme, count in top_themes:
-#            print(f"{theme}: {count}")     
-##
-#
+if __name__ == '__main__':
+        agent = ChatAgent()
+        top_themes = agent.analyze_themes(limit = 4000)
+        print("\n=== Top 10 theme  ===")
+        for theme, count in top_themes:
+            print(f"{theme}: {count}") 
 
 
 

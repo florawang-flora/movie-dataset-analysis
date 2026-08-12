@@ -1,4 +1,6 @@
 postgresql_url: "postgresql://postgres:123@localhost:5432/movie_db"
+database:
+  schema: public
 data_source: 
   movies:
     path: src/movies_metadata.csv
@@ -12,4 +14,23 @@ data_source:
   crew: 
     path: src/credits.csv
     table_name: raw_crew
+
+table_to_load:
+  # Entity tables must be loaded first.
+  - table_name: movie
+    dataframe_name: movie_entity_df
+  - table_name: genre
+    dataframe_name: genre_entity_df
+  - table_name: cast_table
+    dataframe_name: cast_entity_df
+  - table_name: crew
+    dataframe_name: crew_entity_df
+  # Mapping tables must be loaded after entity tables.
+  - table_name: genre_movie
+    dataframe_name: genre_movie_mapping
+  - table_name: cast_movie
+    dataframe_name: cast_movie_mapping
+  - table_name: crew_movie
+    dataframe_name: crew_movie_mapping
+
 
