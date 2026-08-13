@@ -17,10 +17,9 @@ from curation.curation_genre import GenreCuration
 from curation.curation_cast import CastCuration
 from curation.curation_crew import CrewCuration
 from database.database_handler import Database
-from cli.chat_agent
 
 
-def main_data_analytics():
+def data_analytics():
     config = load_conf()
     data_source= config['data_source']
 
@@ -135,30 +134,7 @@ def main_data_analytics():
     database_url=prosgre_url,
     tables=tables,
     export_folder="export")
-def 
 
-
-
-## if __name__ == '__main__':
-#    agent = ChatAgent()
-#    print("Let's Chat! (type quite or exit to leave )\n")
-#    while True: 
-#        user_input = input("You: ")
-#        if user_input.lower() in ('quit','exit', 'bye' ):
-#            print('Goodbye!')
-#            break
-#        # skpit
-#        if not user_input.strip():
-#            continue
-#        reply = agent.random_chat(user_input)
-#        print(reply)
-
-# task1 
-#result = agent.search_movie("What movies did Tom Hanks appear in?")
-#print(result)
-
-if __name__ == '__main__':
-    main_data_analytics()
 
 
 
